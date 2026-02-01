@@ -2,19 +2,11 @@ const express = require("express");
 
 const app = express();
 
-//after middleware we write the same logic in middleware which handle the authorization
-// for all the request which come from admin
-// this is also not a good way the good way is to write the middlewares in a new separate files
+const {adminAuth} = require("./middlewares/auth");
 
-app.use("/admin",(req,res,next) => {
-    const token = "stk";
-    const isAuthorized = token === "stk";
-    if(!isAuthorized){
-        res.status(401).send("unauthorizd admin");
-    }else{
-        next();
-    }
-})
+// this is the best way
+
+app.use("/admin",adminAuth);
 
 app.get("/admin/getData",(req,res) =>{
     res.send("Data send successfully");
