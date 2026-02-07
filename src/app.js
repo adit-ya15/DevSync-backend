@@ -1,12 +1,12 @@
 const express = require("express");
 
 const app = express()
-
+const bcrypt = require("bcryptjs")
 app.use(express.json())
 
 const connectDb = require("./config.js/database")
 const User = require("./models/user")
-
+const validateSignup = require("./utils/validate")
 
 
 connectDb()
@@ -19,9 +19,25 @@ connectDb()
     .catch((error) => console.log("database cannot be connected"))
 
 app.post("/signup", async (req,res) => {
-    const user = new User(req.body)
 
-    try {
+    try{
+        //validate step
+        validateSignup(req);
+
+        //encrypting the password
+        const {firstName,lastName,age,gender,email,password} = req.body
+        const passwordHash = await bcrypt.hash(password,10)
+
+        const user = new User({
+            firstName,
+            lastName,
+            age,
+            gender,
+            email,
+            password : passwordHash
+        })
+
+    
         await user.save()
         res.send("User saved successfully")
     } catch (error) {
