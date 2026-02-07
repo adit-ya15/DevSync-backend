@@ -3,6 +3,9 @@ const express = require("express");
 const app = express()
 
 const connectDb = require("./config.js/database")
+const User = require("./models/user")
+
+
 
 connectDb()
     .then(() => {
@@ -13,7 +16,24 @@ connectDb()
     })
     .catch((error) => console.log("database cannot be connected"))
 
+app.post("/signup", async (req,res) => {
+    const user = new User({
+        firstName : "Aditya",
+        lastName : "Verma",
+        age : 20,
+        email : "aditya@123.com",
+        password : "aditya123",
+        gender : "Male"
+    })
 
+    try {
+        await user.save()
+        res.send("User saved successfully")
+    } catch (error) {
+        console.log("Something went wrong")
+        res.status(401).send("User not saved")
+    }
+})
 
 
 
