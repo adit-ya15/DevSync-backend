@@ -42,11 +42,17 @@ app.delete("/user",async(req,res) => {
 })
 
 app.patch("/user",async(req,res) => {
+
     const data = req.body
     const userId = req.body.userId
     try {
+        const allowedUpdates = ["firstName","lastName","userId","age"];
+        const isUpdateAllowed = Object.keys(data).every((k) => allowedUpdates.includes(k));
+        if(!isUpdateAllowed){
+            throw new Error("Update not allowed")
+        }
         await User.findByIdAndUpdate({_id : userId},data)
-        res.send("User updated successfully")
+        res.send("User updated successfully")        
     } catch (error) {
         console.log(error)
         res.status(400).send("User not updated")
