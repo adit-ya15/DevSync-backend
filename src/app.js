@@ -2,6 +2,8 @@ const express = require("express");
 
 const app = express()
 
+app.use(express.json())
+
 const connectDb = require("./config.js/database")
 const User = require("./models/user")
 
@@ -17,14 +19,8 @@ connectDb()
     .catch((error) => console.log("database cannot be connected"))
 
 app.post("/signup", async (req,res) => {
-    const user = new User({
-        firstName : "Aditya",
-        lastName : "Verma",
-        age : 20,
-        email : "aditya@123.com",
-        password : "aditya123",
-        gender : "Male"
-    })
+    console.log(req.body)
+    const user = new User(req.body)
 
     try {
         await user.save()
