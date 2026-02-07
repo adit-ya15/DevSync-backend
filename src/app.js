@@ -43,7 +43,18 @@ app.delete("/user",async(req,res) => {
     }
 })
 
-
+app.patch("/user",async(req,res) => {
+    const data = req.body
+    const userId = req.body.userId
+    try {
+        await User.findByIdAndUpdate({_id : userId},data)
+        res.send("User updated successfully")
+    } catch (error) {
+        console.log(error)
+        res.status(400).send("User not updated")
+    }
+}
+)
 /*Some important notes
 Version number : 4.19.18;
 Here 4 represnts = Major
