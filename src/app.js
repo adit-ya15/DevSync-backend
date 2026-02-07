@@ -19,15 +19,13 @@ connectDb()
     .catch((error) => console.log("database cannot be connected"))
 
 app.post("/signup", async (req,res) => {
-    console.log(req.body)
     const user = new User(req.body)
 
     try {
         await user.save()
         res.send("User saved successfully")
     } catch (error) {
-        console.log("Something went wrong")
-        res.status(401).send("User not saved")
+        res.status(400).send(error.message)
     }
 })
 

@@ -11,13 +11,21 @@ const userSchema = new mongoose.Schema({
         type : Number
     },
     email : {
-        type : String
+        type : String,
+        required : true,
+        unique : true,
     },
     password : {
-        type : String
+        type : String,
+        required : true,
     },
     gender : {
-        type : String
+        type : String,
+        validate(value){
+            if(!["male","female","other"].includes(value.toLowerCase())){
+                throw new Error("Please enter a valid gender")
+            }
+        }
     }
 },{timestamps : true})
 
