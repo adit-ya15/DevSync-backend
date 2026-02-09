@@ -20,7 +20,7 @@ connectDb()
             console.log("Server listens on the port 9999");
         });
     })
-    .catch((error) => console.log("database cannot be connected"))
+    .catch((error) => console.log("database cannot be connected",error))
 
 app.post("/signup", async (req, res) => {
 
@@ -109,19 +109,18 @@ app.post("/login", async (req, res) => {
     }
 })
 
-app.get("/profile",userAuth, async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
     try {
-
         const user = req.user;
-
-        if (!user) {
-            throw new Error("User not exist")
-        }
-        
-        res.send(user)
+        console.log(user);
+        res.send(user);
     } catch (error) {
-        res.status(400).send(error.message)
+        res.status(400).send(error.message);
     }
+});
+
+app.post("/sendConnectionRequest",async(req,res) =>{
+    res.send("Connection request send")
 })
 
 /*Some important notes
