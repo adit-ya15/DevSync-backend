@@ -11,7 +11,7 @@ userRouter.get("/user/request/received",userAuth,async(req,res) => {
             status : "interested"
         }).populate("fromUserId","firstName lastName")
 
-        res.json({message : "Request fetched successfully",connectionRequests});
+        res.json({message : "Fetched received requests successfully",connectionRequests});
     } catch (error) {
         res.status(400).json({message : error.message});
     }
