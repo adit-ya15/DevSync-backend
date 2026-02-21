@@ -5,6 +5,7 @@ const User = require("../models/user");
 const validator = require("validator");
 
 
+
 const authRouter = express.Router();
 
 authRouter.post("/signup", async (req, res) => {
@@ -45,7 +46,7 @@ authRouter.post("/login", async (req, res) => {
                 if (isValidPass) {
                     const token = await user.getJWT();
                     res.cookie("token", token);
-                    res.send("login successful")
+                    res.send(user);
                 } else {
                     res.send("invalid credentials")
                 }
