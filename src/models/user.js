@@ -28,7 +28,6 @@ const userSchema = new mongoose.Schema(
         },
         photoUrl: {
             type: String,
-            default: "/images/default-avatar.png",
         },
         age: {
             type: Number,
