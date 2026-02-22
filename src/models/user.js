@@ -13,12 +13,19 @@ const userSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
+        about : {
+            type: String,
+            trim: true,
+        },
         email: {
             type: String,
             required: true,
             unique: true,
             lowercase: true,
             trim: true,
+        },
+        skills : {
+            type: [String],
         },
         password: {
             type: String,

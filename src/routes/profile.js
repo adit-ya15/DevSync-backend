@@ -16,20 +16,27 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
     }
 });
 
-profileRouter.post("/profile/edit", userAuth, async (req, res) => {
-    const isUpdateAllowed = validateProfileEditData(req);
+profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+    try {
+        validateProfileEditData(req.body);
 
-    if (isUpdateAllowed === true) {
-        const loggesInUser = req.user;
-        Object.keys(req.body).forEach((key) => loggesInUser[key] = req.body[key]);
-        console.log(loggesInUser);
-        await loggesInUser.save();
-        res.send("User updated successfully");
+        const user = req.user;
+
+        Object.keys(req.body).forEach((key) => {
+            user[key] = req.body[key];
+        });
+
+        await user.save();
+
+        res.status(200).json({
+            message: "Profile updated successfully",
+            user
+        });
+
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
-    else {
-        res.status(400).send(isUpdateAllowed);
-    }
-})
+});
 
 profileRouter.post("/profile/password", userAuth,async (req, res) => {
     try {
