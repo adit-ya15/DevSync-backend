@@ -6,22 +6,22 @@ const userAuth = async (req, res, next) => {
         const { token } = req.cookies;
 
         if (!token) {
-            res.status(401).send("Token is not valid");
+            return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const decodedObj = jwt.verify(token, "DevTinder@4648h");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await User.findById(decodedObj._id);
+        const user = await User.findById(decoded._id);
 
         if (!user) {
-            throw new Error("User not found");
+            return res.status(401).json({ message: "User not found" });
         }
 
         req.user = user;
-
         next();
+
     } catch (error) {
-        res.status(400).send("Error: " + error.message);
+        return res.status(401).json({ message: "Invalid or expired token" });
     }
 };
 

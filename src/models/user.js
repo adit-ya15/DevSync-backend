@@ -1,51 +1,60 @@
-const jwt = require("jsonwebtoken")
-const bcrypt = require("bcryptjs")
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
-const mongoose = require("mongoose")
-
-const userSchema = new mongoose.Schema({
-    firstName :{ 
-        type : String
+const userSchema = new mongoose.Schema(
+    {
+        firstName: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        lastName: {
+            type: String,
+            trim: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true,
+        },
+        password: {
+            type: String,
+            required: true,
+            minlength: 6,
+            select: false, // important
+        },
+        photoUrl: {
+            type: String,
+            default: "/images/default-avatar.png",
+        },
+        age: {
+            type: Number,
+            min: 18,
+        },
+        gender: {
+            type: String,
+            enum: ["male", "female", "other"],
+        },
     },
-    lastName : {
-        type : String
-    },
-    age : {
-        type : Number
-    },
-    email : {
-        type : String,
-        required : true,
-        unique : true,
-    },
-    password : {
-        type : String,
-        required : true,
-    },
-    gender : {
-        type : String,
-        validate(value){
-            if(!["male","female","other"].includes(value.toLowerCase())){
-                throw new Error("Please enter a valid gender")
-            }
-        }
-    }
-},{timestamps : true})
+    { timestamps: true }
+);
 
-userSchema.methods.getJWT = async function(){
-    const user = this;
-    const token = await jwt.sign({_id : user._id},"DevTinder@4648h");
-    return token;
-}
+// JWT
+userSchema.methods.getJWT = function () {
+    return jwt.sign(
+        { _id: this._id },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+    );
+};
 
-userSchema.methods.validateUser = async function(passwordInputByUser){
-    const user = this;
+// Password compare
+userSchema.methods.validateUser = async function (passwordInput) {
+    return await bcrypt.compare(passwordInput, this.password);
+};
 
-    const isValid = await bcrypt.compare(passwordInputByUser,user.password);
-
-    return isValid;
-}
-
-const User = mongoose.model("User",userSchema)
-
-module.exports = User
+const User = mongoose.model("User", userSchema);
+module.exports = User;
