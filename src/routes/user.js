@@ -10,7 +10,7 @@ userRouter.get("/user/request/received",userAuth,async(req,res) => {
         const connectionRequests = await ConnectionRequest.find({
             toUserId : loggedInUser._id,
             status : "interested"
-        }).populate("fromUserId","firstName lastName")
+        }).populate("fromUserId","firstName lastName age gender photoUrl about skills")
 
         res.json({message : "Fetched received requests successfully",connectionRequests});
     } catch (error) {
@@ -26,8 +26,8 @@ userRouter.get("/user/connections",userAuth,async(req,res) => {
             $or:[{toUserId : loggedInUser._id},{fromUserId : loggedInUser._id}],
             status : "accepted"
         })
-        .populate("fromUserId","firstName lastName age gender")
-        .populate("toUserId","firstName lastName age gender")
+        .populate("fromUserId","firstName lastName age gender photoUrl about skills")
+        .populate("toUserId","firstName lastName age gender photoUrl about skills")
 
         const data = connections.map(row => {
             if(row.fromUserId._id.equals(loggedInUser._id)){
