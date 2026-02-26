@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             trim: true,
         },
-        about : {
+        about: {
             type: String,
             trim: true,
         },
@@ -24,14 +24,21 @@ const userSchema = new mongoose.Schema(
             lowercase: true,
             trim: true,
         },
-        skills : {
+        skills: {
             type: [String],
         },
         password: {
             type: String,
-            required: true,
+            required: function () {
+                return !this.googleId;
+            },
             minlength: 6,
             select: false, // important
+        },
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true,
         },
         photoUrl: {
             type: String,

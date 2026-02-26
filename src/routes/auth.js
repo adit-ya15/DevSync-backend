@@ -3,8 +3,9 @@ const bcrypt = require("bcryptjs");
 const { validateSignup } = require("../utils/validate");
 const User = require("../models/user");
 const validator = require("validator");
+const { OAuth2Client } = require("google-auth-library");
 
-
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const authRouter = express.Router();
 
@@ -93,6 +94,48 @@ authRouter.post("/login", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
+
+authRouter.post("/auth/google/callback", async (req, res) => {
+    try {
+        const { credential } = req.body;
+
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        })
+
+        const { email, given_name, family_name, sub: googleId, picture } = ticket.getPayload();
+
+        let user = await User.findOne({ email: email });
+
+        if (!user) {
+            const user = new User({
+                firstName: given_name,
+                lastName: family_name,
+                email: email,
+                googleId: googleId,
+                photoUrl: picture,
+            })
+            await user.save();
+
+        }
+
+        const token = await user.getJWT();
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+            .json({
+                message: "Login Successfully",
+                data: user
+            })
+    } catch (error) {
+        res.status(400).json({ message: "Invalid Google Token" })
+    }
+})
 
 authRouter.post("/logout", (req, res) => {
     res.cookie("token", "", {
