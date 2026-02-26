@@ -23,9 +23,9 @@ authRouter.post("/signup", async (req, res) => {
             password: passwordHash,
         });
 
-        await user.save();
+        const savedUser = await user.save();
 
-        const token = user.getJWT();
+        const token = savedUser.getJWT();
 
         res
             .status(201)
@@ -36,7 +36,7 @@ authRouter.post("/signup", async (req, res) => {
                     process.env.NODE_ENV === "production" ? "none" : "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             })
-            .json({ message: "User created successfully" });
+            .json({ message: "User created successfully", data: savedUser });
 
     } catch (error) {
         if (error.code === 11000) {
