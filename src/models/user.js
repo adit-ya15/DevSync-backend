@@ -30,12 +30,17 @@ const userSchema = new mongoose.Schema(
         password: {
             type: String,
             required: function () {
-                return !this.googleId;
+                return !this.googleId && !this.githubId;
             },
             minlength: 6,
-            select: false, // important
+            select: false,
         },
         googleId: {
+            type: String,
+            unique: true,
+            sparse: true,
+        },
+        githubId: {
             type: String,
             unique: true,
             sparse: true,

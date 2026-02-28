@@ -4,6 +4,7 @@ const { validateSignup } = require("../utils/validate");
 const User = require("../models/user");
 const validator = require("validator");
 const { OAuth2Client } = require("google-auth-library");
+const axios = require("axios");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -109,7 +110,7 @@ authRouter.post("/auth/google/callback", async (req, res) => {
         let user = await User.findOne({ email: email });
 
         if (!user) {
-            const user = new User({
+            user = new User({
                 firstName: given_name,
                 lastName: family_name,
                 email: email,
@@ -134,6 +135,86 @@ authRouter.post("/auth/google/callback", async (req, res) => {
             })
     } catch (error) {
         res.status(400).json({ message: "Invalid Google Token" })
+    }
+})
+
+authRouter.get("/auth/github", (req, res) => {
+    const githubAuthURL =
+        `https://github.com/login/oauth/authorize?` +
+        `client_id=${process.env.GITHUB_CLIENT_ID}&` +
+        `scope=user:email`;
+
+    res.redirect(githubAuthURL);
+})
+
+authRouter.get("/auth/github/callback", async (req, res) => {
+    try {
+        const { code } = req.query;
+
+        if (!code) {
+            return res.status(400).json({ message: "Code not provides" })
+        }
+
+        const tokenResponse = await axios.post(
+            "https://github.com/login/oauth/access_token",
+            {
+                client_id: process.env.GITHUB_CLIENT_ID,
+                client_secret: process.env.GITHUB_CLIENT_SECRET,
+                code,
+            },
+            {
+                headers: { Accept: "application/json" },
+            }
+        )
+
+        const accessToken = tokenResponse.data.access_token;
+
+        const userResponse = await axios.get("https://api.github.com/user", {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+
+        const emailResponse = await axios.get("https://api.github.com/user/emails", {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        })
+
+        const primaryEmail = emailResponse.data.find(
+            (email) => email.primary && email.verified
+        )?.email;
+
+        if (!primaryEmail) {
+            return res.status(400).json({ message: "No verified email found" })
+        }
+
+        let user = await User.findOne({ email: primaryEmail })
+
+        if (!user) {
+            user = new User({
+                email: primaryEmail,
+                firstName: userResponse.data.name || userResponse.data.login,
+                lastName: "",
+                githubId: userResponse.data.id,
+                photoUrl: userResponse.data.avatar_url,
+            })
+            await user.save();
+        }
+
+        const token = await user.getJWT();
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+            .res.redirect("https://devsyncapp.in")
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "GitHub authentication failed" });
     }
 })
 
