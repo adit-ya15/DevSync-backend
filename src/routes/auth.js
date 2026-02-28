@@ -210,7 +210,7 @@ authRouter.get("/auth/github/callback", async (req, res) => {
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
-            .res.redirect("https://devsyncapp.in")
+            .redirect("https://devsyncapp.in")
 
     } catch (error) {
         console.error(error);
