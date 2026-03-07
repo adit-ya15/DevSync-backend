@@ -9,8 +9,8 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }))
 app.use(express.raw({ limit: '100mb' }))
 app.use(cookieParser())
 app.use(cors({
-    origin:"http://localhost:5173",
-    credentials:true
+    origin: "http://localhost:5173",
+    credentials: true
 }))
 
 const connectDb = require("./config.js/database")
@@ -19,7 +19,7 @@ const profileRouter = require("./routes/profile")
 const requestRouter = require("./routes/request")
 const userRouter = require("./routes/user")
 const videoRouter = require("./routes/videoRoutes")
-app.use("/api/videos", videoRouter);
+app.use(videoRouter);
 
 require("./utils/cronScheduleEmail");
 app.use(authRouter);
@@ -34,7 +34,7 @@ connectDb()
             console.log("Server listens");
         });
     })
-    .catch((error) => console.log("database cannot be connected",error))
+    .catch((error) => console.log("database cannot be connected", error))
 
 
 /*Some important notes
