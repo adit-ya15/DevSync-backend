@@ -4,7 +4,7 @@ const cookieParser = require("cookie-parser")
 const cors = require("cors")
 const dotenv = require("dotenv")
 const http = require("http");
-
+const initializeSocket = require("./config.js/socket");
 const server = http.createServer(app);
 
 dotenv.config();
@@ -26,7 +26,7 @@ const requestRouter = require("./routes/request")
 const userRouter = require("./routes/user")
 const videoRouter = require("./routes/videoRoutes")
 const paymentRouter = require('./routes/payment');
-const initializeSocket = require("./config.js/socket");
+
 require("./utils/cronScheduleEmail");
 
 
