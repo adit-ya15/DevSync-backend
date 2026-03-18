@@ -51,40 +51,38 @@ const initializeSocket = (server) => {
                 console.log(error.message)
             }
         })
+        socket.on("typing", (chatId) => {
+            socket.to(chatId).emit("typing", {
+                userId: socket.user._id
+            });
+        });
+        socket.on("stopTyping", (chatId) => {
+            socket.to(chatId).emit("stopTyping", {
+                userId: socket.user._id
+            });
+        });
+
+        socket.on("markSeen", async ({ chatId }) => {
+            const userId = socket.user._id;
+
+            await Message.updateMany(
+                {
+                    chatId,
+                    readBy: { $ne: userId }
+                },
+                {
+                    $addToSet: { readBy: userId }
+                }
+            );
+
+            io.to(chatId).emit("messagesSeen", {
+                userId
+            });
+        });
         socket.on("disconnect", () => { })
     })
 }
 
 
-socket.on("typing", (chatId) => {
-    socket.to(chatId).emit("typing", {
-        userId: socket.user._id
-    });
-});
-
-
-socket.on("stopTyping", (chatId) => {
-    socket.to(chatId).emit("stopTyping", {
-        userId: socket.user._id
-    });
-});
-
-socket.on("markSeen", async ({ chatId }) => {
-    const userId = socket.user._id;
-
-    await Message.updateMany(
-        {
-            chatId,
-            readBy: { $ne: userId }
-        },
-        {
-            $addToSet: { readBy: userId }
-        }
-    );
-
-    io.to(chatId).emit("messagesSeen", {
-        userId
-    });
-});
 
 module.exports = initializeSocket;
