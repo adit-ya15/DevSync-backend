@@ -1,7 +1,7 @@
 const { userAuth } = require("../middlewares/auth");
 const Chat = require("../models/chat");
 const Message = require("../models/message");
-const { getIO } = require("../config.js/socket");
+const { getIO } = require("../config/socket");
 
 const express = require("express");
 

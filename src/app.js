@@ -2,18 +2,16 @@ const express = require("express");
 const app = express()
 const cookieParser = require("cookie-parser")
 const cors = require("cors")
-const dotenv = require("dotenv")
 const http = require("http");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const { initializeSocket } = require("./config.js/socket");
+const { initializeSocket } = require("./config/socket");
 const server = http.createServer(app);
-
-dotenv.config();
+const config = require("./config/index")
 
 const allowedOrigins = [
     "http://localhost:5173",
-    process.env.FRONTEND_URL,
+    config.general.frontendUrl,
 ].filter(Boolean); 
 
 app.use(helmet());
@@ -76,7 +74,7 @@ app.use(videoRouter);
 connectDb()
     .then(() => {
         console.log("Database connection successful")
-        server.listen(process.env.PORT, () => {
+        server.listen(config.port, () => {
             console.log("Server listens");
         });
     })

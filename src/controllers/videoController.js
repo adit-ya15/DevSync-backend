@@ -1,8 +1,8 @@
 const Video = require("../models/Video")
 const Like = require("../models/Like")
 const Comment = require("../models/Comment")
-const cloudinary = require("../config.js/cloudinary");
-const fs = require('fs');
+const cloudinary = require("../config/cloudinary");
+const fs = require('fs');const config = require("../config/index")
 
 
 exports.uploadVideo = async (req, res) => {
@@ -12,9 +12,9 @@ exports.uploadVideo = async (req, res) => {
         const result = await cloudinary.uploader.upload(file.path, {
             resource_type: "video",
             folder: "reels",
-            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-            api_key: process.env.CLOUDINARY_API_KEY,
-            api_secret: process.env.CLOUDINARY_API_SECRET
+            cloud_name: config.storage.cloudinaryCloudName,
+            api_key: config.storage.cloudinaryApiKey,
+            api_secret: config.storage.cloudinaryApiSecret
         })
 
         const video = await Video.create({

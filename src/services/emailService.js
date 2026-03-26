@@ -1,20 +1,21 @@
 const nodemailer = require('nodemailer');
 const { wrapEmail } = require("./emailTemplates");
+const config = require("../config/index");
 
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
+    host: config.email.smtpHost,
+    port: config.email.smtpPort,
     secure: false,
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+        user: config.email.smtpUser,
+        pass: config.email.smtpPass,
     }
 });
 
 const sendEmail = async ({ to, subject, html, preheader }) => {
     await transporter.sendMail({
-        from: `DevSync <${process.env.EMAIL_FROM}>`,
+        from: `DevSync <${config.email.fromEmail}>`,
         to,
         subject,
         html: wrapEmail({ subject, preheader, contentHtml: html })

@@ -4,9 +4,9 @@ const { subDays, startOfDay, endOfDay, format } = require("date-fns");
 const ConnectionRequest = require("../models/connectionRequest");
 const sendEmail = require("../services/emailService");
 const { escapeHtml, button } = require("../services/emailTemplates");
+const config = require("../config/index");
 
-const CRON_EXPRESSION = "0 8 * * *"; // Every day at 08:00
-const CRON_TIMEZONE = process.env.CRON_TIMEZONE; // optional, e.g. "Asia/Kolkata"
+const CRON_EXPRESSION = "0 8 * * *"; 
 
 const groupBy = (items, getKey) => {
 	return items.reduce((acc, item) => {
@@ -45,7 +45,7 @@ cron.schedule(
 			);
 
 			const dateLabel = format(yesterday, "do MMM yyyy");
-			const appUrl = (process.env.FRONTEND_URL || "").replace(/\/$/, "");
+			const appUrl = (config.general.frontendUrl || "").replace(/\/$/, "");
 			const cta = appUrl ? button(appUrl, "Open DevSync") : "";
 
 			for (const recipientId of Object.keys(byRecipient)) {

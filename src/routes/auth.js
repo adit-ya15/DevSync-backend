@@ -9,8 +9,9 @@ const axios = require("axios");
 const sendEmail = require("../services/emailService");
 const UAparser = require("ua-parser-js");
 const { escapeHtml } = require("../services/emailTemplates");
+const config = require('../config/index')
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(config.oauth.googleClientId);
 
 const authRouter = express.Router();
 
@@ -38,7 +39,7 @@ authRouter.post("/signup", async (req, res) => {
         const savedUser = await user.save();
 
         const verifyLink =
-            `${process.env.BACKEND_URL}/verify-email/${rawToken}`;
+            `${config.general.backendUrl}/verify-email/${rawToken}`;
 
         await sendEmail({
             to: savedUser.email,
@@ -78,7 +79,7 @@ authRouter.get("/verify-email/:token", async (req, res) => {
 
         if (!user) {
             return res.redirect(
-                `${process.env.FRONTEND_URL}/verification-failed`
+                `${config.general.frontendUrl}/verification-failed`
             );
         }
 
@@ -89,11 +90,11 @@ authRouter.get("/verify-email/:token", async (req, res) => {
         await user.save();
 
         return res.redirect(
-            `${process.env.FRONTEND_URL}/email-verified`
+            `${config.general.frontendUrl}/email-verified`
         );
 
     } catch (error) {
-        res.redirect(`${process.env.FRONTEND_URL}/verification-error`);
+        res.redirect(`${config.general.frontendUrl}/verification-error`);
     }
 });
 
@@ -124,7 +125,7 @@ authRouter.post("/resend-verification", async (req, res) => {
     await user.save();
 
     const verifyLink =
-        `${process.env.BACKEND_URL}/verify-email/${rawToken}`;
+        `${config.general.backendUrl}/verify-email/${rawToken}`;
 
     await sendEmail({
         to: user.email,
@@ -214,9 +215,9 @@ authRouter.post("/login", async (req, res) => {
         res
             .cookie("token", token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
+                secure: config.deployment.nodeEnv === "production",
                 sameSite:
-                    process.env.NODE_ENV === "production" ? "none" : "lax",
+                    config.deployment.nodeEnv === "production" ? "none" : "lax",
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             })
             .json({
@@ -232,7 +233,7 @@ authRouter.post("/login", async (req, res) => {
 });
 
 authRouter.post("/forgot-password", async (req, res) => {
-    const frontendUrl = process.env.FRONTEND_URL?.trim();
+    const frontendUrl = config.general.frontendUrl?.trim();
     if (!frontendUrl) {
         return res.status(500).json({
             message: "FRONTEND_URL is not configured on the server"
@@ -306,7 +307,7 @@ authRouter.post("/auth/google/callback", async (req, res) => {
 
         const ticket = await client.verifyIdToken({
             idToken: credential,
-            audience: process.env.GOOGLE_CLIENT_ID,
+            audience: config.oauth.googleClientId,
         })
 
         const { email, given_name, family_name, sub: googleId, picture } = ticket.getPayload();
@@ -331,8 +332,8 @@ authRouter.post("/auth/google/callback", async (req, res) => {
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            secure: config.deployment.nodeEnv === "production",
+            sameSite: config.deployment.nodeEnv === "production" ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
             .json({
@@ -348,7 +349,7 @@ authRouter.post("/auth/google/callback", async (req, res) => {
 authRouter.get("/auth/github", (req, res) => {
     const githubAuthURL =
         `https://github.com/login/oauth/authorize?` +
-        `client_id=${process.env.GITHUB_CLIENT_ID}&` +
+        `client_id=${config.oauth.githubClientId}&` +
         `scope=user:email`;
 
     res.redirect(githubAuthURL);
@@ -365,8 +366,8 @@ authRouter.get("/auth/github/callback", async (req, res) => {
         const tokenResponse = await axios.post(
             "https://github.com/login/oauth/access_token",
             {
-                client_id: process.env.GITHUB_CLIENT_ID,
-                client_secret: process.env.GITHUB_CLIENT_SECRET,
+                client_id: config.oauth.githubClientId,
+                client_secret: config.oauth.githubClientSecret,
                 code,
             },
             {
@@ -415,8 +416,8 @@ authRouter.get("/auth/github/callback", async (req, res) => {
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            secure: config.deployment.nodeEnv === "production",
+            sameSite: config.deployment.nodeEnv === "production" ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
             .redirect("https://devsyncapp.in")

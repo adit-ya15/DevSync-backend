@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const config = require("../config/index")
 
 const userAuth = async (req, res, next) => {
     try {
@@ -9,7 +10,7 @@ const userAuth = async (req, res, next) => {
             return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, config.auth.jwtSecret);
         const user = await User.findById(decoded._id);
 
         if (!user) {

@@ -2,13 +2,14 @@ const socket = require("socket.io");
 const Chat = require("../models/chat");
 const jwt = require("jsonwebtoken");
 const Message = require("../models/message");
+const config = require("../config/index")
 
 let ioInstance = null;
 
 const initializeSocket = (server) => {
     const allowedOrigins = [
         "http://localhost:5173",
-        process.env.FRONTEND_URL,
+        config.general.frontendUrl,
     ].filter(Boolean);
 
     const io = socket(server, {
@@ -37,7 +38,7 @@ const initializeSocket = (server) => {
                 return next(new Error("Authentication error: Token missing"));
             }
 
-            const user = jwt.verify(token, process.env.JWT_SECRET);
+            const user = jwt.verify(token, config.auth.jwtSecret);
             socketClient.user = user;
             next();
         } catch (error) {
