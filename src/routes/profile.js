@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer")
 const fs = require("fs");
+const AppError = require("../utils/AppError");
 
 const uploadDir = './uploads/';
 if (!fs.existsSync(uploadDir)) {
@@ -42,21 +43,21 @@ const handleProfileImageUpload = async (req, res, next) => {
         req.body.photoUrl = uploadRes.secure_url;
         next();
     } catch (error) {
-        res.status(400).json({ message: "Image upload failed: " + error.message });
+        next(new AppError("Image upload failed: " + error.message, 400));
     }
 }
 
-profileRouter.get("/profile/view", userAuth, async (req, res) => {
+profileRouter.get("/profile/view", userAuth, async (req, res, next) => {
     try {
         const user = req.user;
         console.log(user);
         res.send(user);
     } catch (error) {
-        res.status(400).send(error.message);
+        next(new AppError(error.message, 400));
     }
 });
 
-profileRouter.patch("/profile/edit", userAuth, upload.single("profileImage"), handleProfileImageUpload, async (req, res) => {
+profileRouter.patch("/profile/edit", userAuth, upload.single("profileImage"), handleProfileImageUpload, async (req, res, next) => {
     try {
         if (req.body.age) {
             req.body.age = Number(req.body.age);
@@ -85,11 +86,11 @@ profileRouter.patch("/profile/edit", userAuth, upload.single("profileImage"), ha
         });
 
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        next(new AppError(error.message, 400));
     }
 });
 
-profileRouter.post("/profile/password", userAuth, async (req, res) => {
+profileRouter.post("/profile/password", userAuth, async (req, res, next) => {
     try {
         const loggesInUser = req.user;
 
@@ -114,7 +115,7 @@ profileRouter.post("/profile/password", userAuth, async (req, res) => {
             throw new Error("Please enter correct password")
         }
     } catch (error) {
-        res.status(400).send("Err :" + error.message)
+            next(new AppError(error.message, 400))
     }
 })
 

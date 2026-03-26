@@ -6,6 +6,8 @@ const sendEmail = require("../services/emailService");
 const { escapeHtml, button } = require("../services/emailTemplates");
 const config = require("../config/index");
 
+const CRON_TIMEZONE = process.env.CRON_TIMEZONE;
+
 const CRON_EXPRESSION = "0 8 * * *"; 
 
 const groupBy = (items, getKey) => {

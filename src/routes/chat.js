@@ -1,10 +1,11 @@
 const express = require("express");
 const { userAuth } = require("../middlewares/auth");
 const Chat = require("../models/chat");
+const AppError = require("../utils/AppError");
 
 const chatRouter = express.Router();
 
-chatRouter.post("/create/chat", userAuth, async (req, res) => {
+chatRouter.post("/create/chat", userAuth, async (req, res, next) => {
     try {
         const { participants = [] } = req.body;
         const userId = req.user._id;
@@ -20,11 +21,11 @@ chatRouter.post("/create/chat", userAuth, async (req, res) => {
 
         res.json(chat);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        next(new AppError(error.message, 400));
     }
 });
 
-chatRouter.get("/get/chats", userAuth, async (req, res) => {
+chatRouter.get("/get/chats", userAuth, async (req, res, next) => {
     try {
         const userId = req.user._id;
 
@@ -36,7 +37,7 @@ chatRouter.get("/get/chats", userAuth, async (req, res) => {
 
         res.json(chats);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        next(new AppError(error.message, 400));
     }
 });
 

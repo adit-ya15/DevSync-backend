@@ -2,11 +2,12 @@ const express = require("express");
 const { userAuth } = require("../middlewares/auth")
 const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
+const AppError = require("../utils/AppError");
 
 
 const requestRouter = express.Router();
 
-requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res) => {
+requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res, next) => {
     try {
         const fromUserId = req.user._id;
         const toUserId = req.params.toUserId;
@@ -54,7 +55,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
 //         res.status(200).send("Connection request send successfully")
 
     } catch (error) {
-        res.status(400).send("Err : " + error.message)
+        next(new AppError(error.message, 400))
     }
 })
 

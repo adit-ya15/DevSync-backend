@@ -5,9 +5,11 @@ const cors = require("cors")
 const http = require("http");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const { initializeSocket } = require("./config/socket");
+const { initializeSocket } = require("./services/socket");
 const server = http.createServer(app);
 const config = require("./config/index")
+const errorHandler = require("./middlewares/errorMiddleware")
+const AppError = require("./utils/AppError")
 
 const allowedOrigins = [
     "http://localhost:5173",
@@ -35,7 +37,7 @@ app.use(cors({
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            callback(new Error("Not allowed by CORS"));
+            callback(new AppError("Not allowed by CORS", 403));
         }
     },
     credentials: true
@@ -43,7 +45,7 @@ app.use(cors({
 
 initializeSocket(server);
 
-const connectDb = require("./config.js/database")
+const connectDb = require("./database/connection")
 const authRouter = require("./routes/auth")
 const profileRouter = require("./routes/profile")
 const requestRouter = require("./routes/request")
@@ -71,6 +73,11 @@ app.use(messageRouter);
 app.use(paymentRouter);
 app.use(videoRouter);
 
+app.use((req, res, next) => {
+    next(new AppError(`Cannot find ${req.originalUrl} on this server`, 404));
+});
+
+app.use(errorHandler)
 connectDb()
     .then(() => {
         console.log("Database connection successful")

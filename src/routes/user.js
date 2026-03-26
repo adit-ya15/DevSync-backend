@@ -3,8 +3,9 @@ const { userAuth } = require('../middlewares/auth');
 const ConnectionRequest = require('../models/connectionRequest');
 const userRouter = express.Router();
 const User = require("../models/user")
+const AppError = require("../utils/AppError")
 
-userRouter.get("/user/request/received",userAuth,async(req,res) => {
+userRouter.get("/user/request/received",userAuth,async(req,res,next) => {
     try {
         const loggedInUser = req.user;
         const connectionRequests = await ConnectionRequest.find({
@@ -14,12 +15,12 @@ userRouter.get("/user/request/received",userAuth,async(req,res) => {
 
         res.json({message : "Fetched received requests successfully",connectionRequests});
     } catch (error) {
-        res.status(400).json({message : error.message});
+        next(new AppError(error.message, 400));
     }
 })
 
 
-userRouter.get("/user/connections",userAuth,async(req,res) => {
+userRouter.get("/user/connections",userAuth,async(req,res,next) => {
     try {
         const loggedInUser = req.user;
         const connections = await ConnectionRequest.find({
@@ -40,13 +41,13 @@ userRouter.get("/user/connections",userAuth,async(req,res) => {
         res.json({message : "Connections fetched successfully",data})
 
     } catch (error) {
-        res.status(400).json({message : error.message})
+        next(new AppError(error.message, 400))
     }
 
     
 })
 
-userRouter.get("/user/feed", userAuth, async(req,res) => {
+userRouter.get("/user/feed", userAuth, async(req,res,next) => {
     try {
         const loggedInUser = req.user;
         const page = req.query.page || 1;
@@ -72,7 +73,7 @@ userRouter.get("/user/feed", userAuth, async(req,res) => {
             feed
         })
     } catch (error) {
-        res.status(400).json({message : error.message})
+        next(new AppError(error.message, 400))
     }
 })
 

@@ -10,13 +10,14 @@ const sendEmail = require("../services/emailService");
 const UAparser = require("ua-parser-js");
 const { escapeHtml } = require("../services/emailTemplates");
 const config = require('../config/index')
+const AppError = require("../utils/AppError");
 
 const client = new OAuth2Client(config.oauth.googleClientId);
 
 const authRouter = express.Router();
 
 
-authRouter.post("/signup", async (req, res) => {
+authRouter.post("/signup", async (req, res, next) => {
     try {
         validateSignup(req.body);
 
@@ -61,10 +62,9 @@ authRouter.post("/signup", async (req, res) => {
 
     } catch (error) {
         if (error.code === 11000) {
-            return res.status(400).json({ message: "Email already exists" });
+            return next(new AppError("Email already exists", 400));
         }
-
-        res.status(400).json({ message: error.message });
+        next(error.statusCode ? error : new AppError(error.message, 400));
     }
 });
 
@@ -143,7 +143,7 @@ authRouter.post("/resend-verification", async (req, res) => {
     res.json({ message: "Email sent" })
 })
 
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login", async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
@@ -228,7 +228,7 @@ authRouter.post("/login", async (req, res) => {
 
     } catch (error) {
         console.error("Login error:", error);
-        res.status(500).json({ message: "Server error" });
+        next(new AppError("Server error", 500));
     }
 });
 
@@ -301,7 +301,7 @@ authRouter.post("/reset-password/:token", async (req, res) => {
     res.json({ message: "Password reset successfully" })
 })
 
-authRouter.post("/auth/google/callback", async (req, res) => {
+authRouter.post("/auth/google/callback", async (req, res, next) => {
     try {
         const { credential } = req.body;
 
@@ -342,7 +342,7 @@ authRouter.post("/auth/google/callback", async (req, res) => {
             })
         req.user = user;
     } catch (error) {
-        res.status(400).json({ message: "Invalid Google Token" })
+        next(new AppError("Invalid Google Token", 400));
     }
 })
 
@@ -355,7 +355,7 @@ authRouter.get("/auth/github", (req, res) => {
     res.redirect(githubAuthURL);
 })
 
-authRouter.get("/auth/github/callback", async (req, res) => {
+authRouter.get("/auth/github/callback", async (req, res, next) => {
     try {
         const { code } = req.query;
 
@@ -424,7 +424,7 @@ authRouter.get("/auth/github/callback", async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "GitHub authentication failed" });
+        next(new AppError("GitHub authentication failed", 500));
     }
 })
 

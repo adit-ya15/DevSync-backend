@@ -1,11 +1,11 @@
 const Video = require("../models/Video")
 const Like = require("../models/Like")
 const Comment = require("../models/Comment")
-const cloudinary = require("../config/cloudinary");
+const cloudinary = require("../integrations/cloudinary");
 const fs = require('fs');const config = require("../config/index")
 
 
-exports.uploadVideo = async (req, res) => {
+exports.uploadVideo = async (req, res, next) => {
     try {
         const file = req.file;
 
@@ -29,12 +29,12 @@ exports.uploadVideo = async (req, res) => {
         res.json(video);
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 }
 
 
-exports.addView = async (req, res) => {
+exports.addView = async (req, res, next) => {
     try {
         const video = await Video.findByIdAndUpdate(
             req.params.id,
@@ -46,11 +46,11 @@ exports.addView = async (req, res) => {
 
         res.json(video);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 
-exports.toggleLike = async (req, res) => {
+exports.toggleLike = async (req, res, next) => {
     try {
         const { videoId } = req.body;
         const userId = req.user._id;
@@ -76,11 +76,11 @@ exports.toggleLike = async (req, res) => {
 
         res.json({ liked: true });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 
-exports.addComment = async (req, res) => {
+exports.addComment = async (req, res, next) => {
     try {
         const { videoId, text } = req.body;
         const userId = req.user._id;
@@ -101,11 +101,11 @@ exports.addComment = async (req, res) => {
 
         res.json(comment);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 
-exports.getComments = async (req, res) => {
+exports.getComments = async (req, res, next) => {
     try {
         const { videoId } = req.params;
 
@@ -119,12 +119,12 @@ exports.getComments = async (req, res) => {
 
         res.json(comments);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 
 
-exports.getFeed = async (req, res) => {
+exports.getFeed = async (req, res, next) => {
     try {
         const loggedInUserId = req.user._id;
 
@@ -148,11 +148,11 @@ exports.getFeed = async (req, res) => {
 
         res.json(videosWithLikedStatus);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 
-exports.deleteVideo = async (req, res) => {
+exports.deleteVideo = async (req, res, next) => {
     try {
         const { id: videoId } = req.params;
         const userId = req.user._id;
@@ -189,6 +189,6 @@ exports.deleteVideo = async (req, res) => {
         res.json({ message: "Video deleted successfully" });
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
