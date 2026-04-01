@@ -51,7 +51,10 @@ const allowedOrigins = [
 
 const allowedOriginSet = new Set(allowedOrigins);
 
-app.use(helmet());
+app.use(helmet({
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
