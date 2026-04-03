@@ -370,6 +370,15 @@ authRouter.get("/auth/github", (req, res) => {
     res.redirect(githubAuthURL);
 })
 
+authRouter.get("/auth/github/url", (req, res) => {
+    const githubAuthURL =
+        `https://github.com/login/oauth/authorize?` +
+        `client_id=${config.oauth.githubClientId}&` +
+        `scope=user:email`;
+
+    res.json({ url: githubAuthURL });
+})
+
 authRouter.get("/auth/github/callback", async (req, res, next) => {
     try {
         const { code } = req.query;
