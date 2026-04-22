@@ -429,10 +429,33 @@ authRouter.get("/auth/github/callback", async (req, res, next) => {
                 firstName: userResponse.data.name || userResponse.data.login,
                 lastName: "",
                 githubId: userResponse.data.id,
+                githubUsername: userResponse.data.login,
                 photoUrl: userResponse.data.avatar_url,
                 authProvider: "github",
                 isVerified: true
             })
+            await user.save();
+        } else {
+            const nextGithubId = String(userResponse.data.id);
+            const nextGithubUsername = userResponse.data.login || "";
+
+            if (!user.githubId) {
+                user.githubId = nextGithubId;
+            }
+
+            if (!user.githubUsername && nextGithubUsername) {
+                user.githubUsername = nextGithubUsername;
+            }
+
+            if (!user.photoUrl && userResponse.data.avatar_url) {
+                user.photoUrl = userResponse.data.avatar_url;
+            }
+
+            if (!user.authProvider || user.authProvider === "local") {
+                user.authProvider = "github";
+            }
+
+            user.isVerified = true;
             await user.save();
         }
 
