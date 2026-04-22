@@ -7,7 +7,6 @@ const awardBadge = async (userId, badgeType) => {
         const existingBadge = await UserBadge.findOne({ userId, badgeType });
         if (!existingBadge) {
             await UserBadge.create({ userId, badgeType });
-            // Here you could integrate Sockets or Push Notifications
             console.log(`User ${userId} earned badge: ${badgeType}`);
         }
     } catch (error) {
@@ -21,18 +20,15 @@ const trackUserActivity = async (userId) => {
         if (!user) return;
 
         const now = new Date();
-        // Truncate to start of today (YYYY-MM-DD)
         const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
         
         let activity = await Activity.findOne({ userId, date: today });
         if (activity) {
-            // Already active today, just increment count
             activity.count += 1;
             await activity.save();
-            return user.currentStreak; // Streak already maintained today
+            return user.currentStreak;
         }
 
-        // New activity for today
         await Activity.create({ userId, date: today, count: 1 });
 
         const yesterday = new Date(today);
@@ -64,7 +60,6 @@ const trackUserActivity = async (userId) => {
         user.lastActivityAt = now;
         await user.save();
 
-        // Check gamification milestones
         if (user.currentStreak >= 7) await awardBadge(userId, "7_DAY_STREAK");
         if (user.currentStreak >= 30) await awardBadge(userId, "30_DAY_STREAK");
         if (user.currentStreak >= 100) await awardBadge(userId, "100_DAY_STREAK");

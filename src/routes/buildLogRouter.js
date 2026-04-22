@@ -5,7 +5,6 @@ const { trackUserActivity } = require('../services/gamificationService');
 
 const buildLogRouter = express.Router();
 
-// Get all build logs
 buildLogRouter.get('/build-logs', userAuth, async (req, res) => {
   try {
     const logs = await BuildLog.find({})
@@ -18,7 +17,6 @@ buildLogRouter.get('/build-logs', userAuth, async (req, res) => {
   }
 });
 
-// Create build log
 buildLogRouter.post('/build-logs', userAuth, async (req, res) => {
   try {
     const { title, content, tags } = req.body;
@@ -35,7 +33,6 @@ buildLogRouter.post('/build-logs', userAuth, async (req, res) => {
 
     await trackUserActivity(req.user._id);
     
-    // Populate before returning
     const populatedLog = await BuildLog.findById(newLog._id)
         .populate('author', 'firstName lastName photoUrl githubUsername');
         
@@ -45,7 +42,6 @@ buildLogRouter.post('/build-logs', userAuth, async (req, res) => {
   }
 });
 
-// Toggle Like
 buildLogRouter.post('/build-logs/:id/like', userAuth, async (req, res) => {
   try {
     const log = await BuildLog.findById(req.params.id);
@@ -65,7 +61,6 @@ buildLogRouter.post('/build-logs/:id/like', userAuth, async (req, res) => {
   }
 });
 
-// Delete build log
 buildLogRouter.delete('/build-logs/:id', userAuth, async (req, res) => {
   try {
     const log = await BuildLog.findById(req.params.id);

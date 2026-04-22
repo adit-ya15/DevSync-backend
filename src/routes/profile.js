@@ -28,7 +28,6 @@ const profileRouter = express.Router();
 
 const handleProfileImageUpload = async (req, res, next) => {
     try {
-        // Handle profile image upload
         if (req.files?.profileImage?.[0]) {
             const file = req.files.profileImage[0];
             const uploadRes = await cloudinary.uploader.upload(file.path);
@@ -42,7 +41,6 @@ const handleProfileImageUpload = async (req, res, next) => {
             req.body.photoUrl = uploadRes.secure_url;
         }
 
-        // Handle cover photo upload
         if (req.files?.coverPhoto?.[0]) {
             const file = req.files.coverPhoto[0];
             const uploadRes = await cloudinary.uploader.upload(file.path);
@@ -84,7 +82,6 @@ profileRouter.patch("/profile/edit", userAuth, upload.fields([
             try {
                 req.body.skills = JSON.parse(req.body.skills);
             } catch (e) {
-                // Ignore parsing errors, let validator catch it
             }
         }
 

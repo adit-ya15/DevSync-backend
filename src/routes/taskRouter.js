@@ -6,7 +6,6 @@ const { trackUserActivity } = require('../services/gamificationService');
 
 const taskRouter = express.Router();
 
-// Middleware to check if user is member of project
 const checkProjectMember = async (req, res, next) => {
   try {
     const projectId = req.params.projectId || req.body.projectId;
@@ -19,14 +18,13 @@ const checkProjectMember = async (req, res, next) => {
       return res.status(403).json({ message: 'Must be a project member to access tasks' });
     }
     
-    req.project = project; // attach project to request
+    req.project = project;
     next();
   } catch (error) {
     res.status(500).json({ message: 'Error checking project membership', error: error.message });
   }
 };
 
-// Create a task
 taskRouter.post('/projects/:projectId/tasks', userAuth, checkProjectMember, async (req, res) => {
   try {
     const { title, description, status, priority, assignee } = req.body;
@@ -47,7 +45,6 @@ taskRouter.post('/projects/:projectId/tasks', userAuth, checkProjectMember, asyn
     
     await trackUserActivity(req.user._id);
 
-    // Populate assignee for frontend
     await savedTask.populate('assignee', 'firstName lastName photoUrl');
     
     res.status(201).json(savedTask);
@@ -56,7 +53,6 @@ taskRouter.post('/projects/:projectId/tasks', userAuth, checkProjectMember, asyn
   }
 });
 
-// Get all tasks for a project
 taskRouter.get('/projects/:projectId/tasks', userAuth, checkProjectMember, async (req, res) => {
   try {
     const tasks = await Task.find({ projectId: req.project._id })
@@ -70,7 +66,6 @@ taskRouter.get('/projects/:projectId/tasks', userAuth, checkProjectMember, async
   }
 });
 
-// Update a task (status, assign, etc)
 taskRouter.patch('/projects/:projectId/tasks/:taskId', userAuth, checkProjectMember, async (req, res) => {
   try {
     const { title, description, status, priority, assignee } = req.body;
@@ -83,7 +78,7 @@ taskRouter.patch('/projects/:projectId/tasks/:taskId', userAuth, checkProjectMem
     if (description !== undefined) task.description = description;
     if (status) task.status = status;
     if (priority) task.priority = priority;
-    if (assignee !== undefined) task.assignee = assignee; // allow clearing assignee by sending null
+    if (assignee !== undefined) task.assignee = assignee;
 
     await task.save();
     
@@ -97,7 +92,6 @@ taskRouter.patch('/projects/:projectId/tasks/:taskId', userAuth, checkProjectMem
   }
 });
 
-// Delete a task
 taskRouter.delete('/projects/:projectId/tasks/:taskId', userAuth, checkProjectMember, async (req, res) => {
   try {
     const task = await Task.findOneAndDelete({ _id: req.params.taskId, projectId: req.params.projectId });

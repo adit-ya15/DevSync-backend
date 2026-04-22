@@ -103,7 +103,6 @@ const userSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// JWT
 userSchema.methods.getJWT = function () {
     return jwt.sign(
         { _id: this._id },
@@ -112,7 +111,6 @@ userSchema.methods.getJWT = function () {
     );
 };
 
-// Password compare
 userSchema.methods.validateUser = async function (passwordInput) {
     return await bcrypt.compare(passwordInput, this.password);
 };

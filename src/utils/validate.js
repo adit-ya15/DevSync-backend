@@ -4,7 +4,6 @@ const AppError = require("./AppError");
 const validateSignup = (data) => {
     const { firstName, lastName, email, password } = data;
 
-    // First Name
     if (!firstName || !firstName.trim()) {
         throw new AppError("First name is required", 400);
     }
@@ -17,7 +16,6 @@ const validateSignup = (data) => {
         throw new AppError("First name must contain only letters", 400);
     }
 
-    // Last Name
     if (!lastName || !lastName.trim()) {
         throw new AppError("Last name is required", 400);
     }
@@ -30,12 +28,10 @@ const validateSignup = (data) => {
         throw new AppError("Last name must contain only letters", 400);
     }
 
-    // Email
     if (!email || !validator.isEmail(email)) {
         throw new AppError("Invalid email address", 400);
     }
 
-    // Password
     if (
         !password ||
         !validator.isStrongPassword(password, {
@@ -65,7 +61,6 @@ const validateProfileEditData = (data) => {
         "skills"
     ];
 
-    // Allow only permitted fields
     const isAllowed = Object.keys(data).every((key) =>
         allowedFields.includes(key)
     );
@@ -76,7 +71,6 @@ const validateProfileEditData = (data) => {
 
     const { firstName, lastName, age, gender, photoUrl, coverPhotoUrl, about, skills } = data;
 
-    // First Name
     if (firstName !== undefined) {
         if (!firstName.trim()) {
             throw new AppError("First name cannot be empty", 400);
@@ -91,7 +85,6 @@ const validateProfileEditData = (data) => {
         }
     }
 
-    // Last Name
     if (lastName !== undefined) {
         if (!lastName.trim()) {
             throw new AppError("Last name cannot be empty", 400);
@@ -106,14 +99,12 @@ const validateProfileEditData = (data) => {
         }
     }
 
-    // Age
     if (age !== undefined) {
         if (!Number.isInteger(age) || age < 18 || age > 100) {
             throw new AppError("Age must be between 18 and 100", 400);
         }
     }
 
-    // Gender
     if (gender !== undefined) {
         const allowedGender = ["male", "female", "other"];
 
@@ -122,21 +113,18 @@ const validateProfileEditData = (data) => {
         }
     }
 
-    // Photo URL
     if (photoUrl !== undefined) {
         if (!validator.isURL(photoUrl)) {
             throw new AppError("Invalid photo URL", 400);
         }
     }
 
-    // Cover Photo URL
     if (coverPhotoUrl !== undefined) {
         if (!validator.isURL(coverPhotoUrl)) {
             throw new AppError("Invalid cover photo URL", 400);
         }
     }
 
-    // About
     if (about !== undefined) {
         if (!about.trim()) {
             throw new AppError("About section cannot be empty", 400);
@@ -147,7 +135,6 @@ const validateProfileEditData = (data) => {
         }
     }
 
-    // Skills
     if (skills !== undefined) {
         if (!Array.isArray(skills)) {
             throw new AppError("Skills must be an array", 400);

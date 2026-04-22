@@ -14,7 +14,7 @@ const buildLogSchema = new mongoose.Schema(
       maxLength: 100,
     },
     content: {
-      type: String, // Markdown supported
+      type: String,
       required: true,
     },
     tags: {

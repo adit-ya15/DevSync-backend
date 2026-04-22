@@ -8,10 +8,8 @@ const { parseConfiguredOrigins } = require("../utils/origin");
 
 let ioInstance = null;
 
-// In-memory presence (online/offline) tracking.
-// NOTE: This resets when the server restarts. Good enough for MVP presence.
-const onlineUsers = new Map(); // userId -> Set(socketId)
-const socketToUser = new Map(); // socketId -> userId
+const onlineUsers = new Map();
+const socketToUser = new Map();
 
 const normalizeId = (id) => (id === undefined || id === null ? "" : String(id));
 
@@ -97,12 +95,10 @@ const initializeSocket = (server) => {
     io.on("connection", (socketClient) => {
         const currentUserId = normalizeId(socketClient.user?._id);
 
-        // Join a per-user room for targeted emits (handy for notifications).
         if (currentUserId) {
             socketClient.join(`user:${currentUserId}`);
         }
 
-        // Presence: mark online and notify watchers.
         const { becameOnline } = upsertOnlineSocket(currentUserId, socketClient.id);
         if (becameOnline) {
             io.to(`watch:${currentUserId}`).emit("presence:update", {
@@ -111,8 +107,6 @@ const initializeSocket = (server) => {
             });
         }
 
-        // Allows the client to watch another user's presence.
-        // Recommended flow: when user opens a 1-1 chat, call watchUser({ userId: otherUserId }).
         socketClient.on("watchUser", async ({ userId: targetUserId } = {}, ack) => {
             try {
                 const watcherId = normalizeId(socketClient.user?._id);
@@ -123,7 +117,6 @@ const initializeSocket = (server) => {
                     return;
                 }
 
-                // Basic authorization: only allow watching users you share a chat with (or yourself).
                 if (watcherId !== targetId) {
                     const hasChat = await Chat.exists({ participants: { $all: [watcherId, targetId] } });
                     if (!hasChat) {
@@ -153,7 +146,6 @@ const initializeSocket = (server) => {
             if (typeof ack === "function") ack({ ok: true });
         });
 
-        // Convenience: get online statuses for a list of users.
         socketClient.on("presence:get", ({ userIds } = {}, ack) => {
             const ids = Array.isArray(userIds) ? userIds.map(normalizeId).filter(Boolean) : [];
             const payload = ids.map((id) => ({ userId: id, online: isUserOnline(id) }));
@@ -182,7 +174,6 @@ const initializeSocket = (server) => {
 
                 socketClient.join(chatId);
 
-                // Auto-watch and push presence list for other chat participants.
                 const otherUserIds = chat.participants
                     .map((p) => normalizeId(p))
                     .filter((id) => id && id !== userId);

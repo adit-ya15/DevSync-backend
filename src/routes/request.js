@@ -51,14 +51,6 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res,
             status,
         });
 
-//         await sendMail(
-//             toUserEmail.email,
-//             "Connection Request",
-//             `${req.user.firstName} sent you a connection request`,
-//             `<h1>Welcome</h1>
-//    <p>${req.user.firstName} sent you a connection request</p>`
-//         );
-
         if (status === "interested") {
             await Notification.create({
                 recipient: toUserId,

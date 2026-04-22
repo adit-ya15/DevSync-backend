@@ -8,7 +8,7 @@ const userBadgeSchema = new mongoose.Schema(
             required: true,
         },
         badgeType: {
-            type: String, // e.g., "100_DAY_STREAK", "FIRST_BLOOD"
+            type: String,
             required: true,
         },
         earnedAt: {
@@ -19,7 +19,6 @@ const userBadgeSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Prevent user from earning the exact same badge multiple times if needed (optional)
 userBadgeSchema.index({ userId: 1, badgeType: 1 }, { unique: true });
 
 const UserBadge = mongoose.model("UserBadge", userBadgeSchema);

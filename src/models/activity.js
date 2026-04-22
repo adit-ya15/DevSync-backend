@@ -8,7 +8,7 @@ const activitySchema = new mongoose.Schema(
             required: true,
         },
         date: {
-            type: Date, // Truncated to YYYY-MM-DD
+            type: Date,
             required: true,
         },
         count: {
@@ -19,7 +19,6 @@ const activitySchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Only one activity record per user per day
 activitySchema.index({ userId: 1, date: 1 }, { unique: true });
 
 const Activity = mongoose.model("Activity", activitySchema);

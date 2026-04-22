@@ -18,7 +18,6 @@ chatRouter.post("/create/chat", userAuth, async (req, res, next) => {
         const participantArray = Array.from(participantSet);
 
         if (isGroup) {
-            // Group chats need at least 3 participants (creator + 2 others)
             if (participantArray.length < 3) {
                 return next(new AppError("Group chats require at least 3 participants", 400));
             }
@@ -41,7 +40,6 @@ chatRouter.post("/create/chat", userAuth, async (req, res, next) => {
             return res.json(populated);
         }
 
-        // 1:1 chat — prevent duplicates
         if (participantArray.length !== 2) {
             return next(new AppError("Direct chats must have exactly 2 participants", 400));
         }

@@ -5,7 +5,6 @@ const AppError = require("../utils/AppError");
 
 const notificationRouter = express.Router();
 
-// GET /notifications — fetch all notifications for the logged-in user
 notificationRouter.get("/notifications", userAuth, async (req, res, next) => {
     try {
         const userId = req.user._id;
@@ -34,7 +33,6 @@ notificationRouter.get("/notifications", userAuth, async (req, res, next) => {
     }
 });
 
-// PATCH /notifications/:id/read — mark a single notification as read
 notificationRouter.patch("/notifications/:id/read", userAuth, async (req, res, next) => {
     try {
         const userId = req.user._id;
@@ -55,7 +53,6 @@ notificationRouter.patch("/notifications/:id/read", userAuth, async (req, res, n
     }
 });
 
-// PATCH /notifications/read-all — mark all notifications as read
 notificationRouter.patch("/notifications/read-all", userAuth, async (req, res, next) => {
     try {
         const userId = req.user._id;
@@ -74,7 +71,6 @@ notificationRouter.patch("/notifications/read-all", userAuth, async (req, res, n
     }
 });
 
-// DELETE /notifications/:id — delete a single notification
 notificationRouter.delete("/notifications/:id", userAuth, async (req, res, next) => {
     try {
         const userId = req.user._id;
@@ -94,7 +90,6 @@ notificationRouter.delete("/notifications/:id", userAuth, async (req, res, next)
     }
 });
 
-// DELETE /notifications — delete all notifications for the logged-in user
 notificationRouter.delete("/notifications", userAuth, async (req, res, next) => {
     try {
         const userId = req.user._id;

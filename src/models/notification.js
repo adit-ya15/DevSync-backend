@@ -32,7 +32,6 @@ const notificationSchema = new mongoose.Schema({
     body: {
         type: String
     },
-    // Optional reference to the related entity (chatId, projectId, videoId, etc.)
     relatedEntity: {
         type: mongoose.Schema.Types.ObjectId,
         refPath: "relatedModel"
@@ -48,7 +47,6 @@ const notificationSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Compound index for efficient queries: unread notifications for a user, sorted by time
 notificationSchema.index({ recipient: 1, isRead: 1, createdAt: -1 });
 
 const Notification = mongoose.model("Notification", notificationSchema);

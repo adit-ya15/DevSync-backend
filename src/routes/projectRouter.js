@@ -7,7 +7,6 @@ const { trackUserActivity } = require('../services/gamificationService');
 
 const projectRouter = express.Router();
 
-// Get all open projects
 projectRouter.get('/projects', userAuth, async (req, res) => {
   try {
     const projects = await Project.find({ status: 'Open' })
@@ -20,7 +19,6 @@ projectRouter.get('/projects', userAuth, async (req, res) => {
   }
 });
 
-// Create a new project
 projectRouter.post('/project', userAuth, async (req, res) => {
   try {
     const { title, description, techStack, rolesNeeded, repoUrl, maxMembers, status } = req.body;
@@ -43,7 +41,6 @@ projectRouter.post('/project', userAuth, async (req, res) => {
 
     const savedProject = await newProject.save();
 
-    // Create a group chat for the project
     const chat = new Chat({
       isGroup: true,
       name: `${title} - General`,
@@ -62,7 +59,6 @@ projectRouter.post('/project', userAuth, async (req, res) => {
   }
 });
 
-// Get a single project by ID
 projectRouter.get('/projects/:projectId', userAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId)
@@ -80,7 +76,6 @@ projectRouter.get('/projects/:projectId', userAuth, async (req, res) => {
   }
 });
 
-// Edit project
 projectRouter.patch('/projects/:projectId', userAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
@@ -110,7 +105,6 @@ projectRouter.patch('/projects/:projectId', userAuth, async (req, res) => {
   }
 });
 
-// Delete project
 projectRouter.delete('/projects/:projectId', userAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
@@ -132,7 +126,6 @@ projectRouter.delete('/projects/:projectId', userAuth, async (req, res) => {
   }
 });
 
-// Request to join project
 projectRouter.post('/projects/:projectId/join', userAuth, async (req, res) => {
   try {
     const project = await Project.findById(req.params.projectId);
@@ -141,13 +134,11 @@ projectRouter.post('/projects/:projectId/join', userAuth, async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    // Check if user is already a member
     const isMember = project.members.some(m => m.user.toString() === req.user._id.toString());
     if (isMember) {
       return res.status(400).json({ message: 'You are already a member of this project' });
     }
 
-    // Check if user has already requested
     const hasRequested = project.joinRequests.some(m => m.user.toString() === req.user._id.toString() && m.status === 'pending');
     if (hasRequested) {
       return res.status(400).json({ message: 'You have already requested to join this project' });
@@ -166,10 +157,9 @@ projectRouter.post('/projects/:projectId/join', userAuth, async (req, res) => {
   }
 });
 
-// Respond to join request
 projectRouter.post('/projects/:projectId/request/:requestId/respond', userAuth, async (req, res) => {
   try {
-    const { action } = req.body; // 'accept' or 'reject'
+    const { action } = req.body;
     const project = await Project.findById(req.params.projectId);
 
     if (!project) return res.status(404).json({ message: 'Project not found' });
@@ -185,7 +175,6 @@ projectRouter.post('/projects/:projectId/request/:requestId/respond', userAuth, 
         project.members.push({ user: request.user, role: 'member' });
       }
 
-      // Add user to project chat
       const chat = await Chat.findOne({ projectId: project._id });
       if (chat && !chat.participants.includes(request.user)) {
         chat.participants.push(request.user);
@@ -200,7 +189,6 @@ projectRouter.post('/projects/:projectId/request/:requestId/respond', userAuth, 
 
     await project.save();
     
-    // Return updated project with populated fields
     const updatedProject = await Project.findById(req.params.projectId)
       .populate('owner', 'firstName lastName photoUrl')
       .populate('members.user', 'firstName lastName photoUrl skills')

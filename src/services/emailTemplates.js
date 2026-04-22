@@ -26,7 +26,6 @@ const wrapEmail = ({ subject, preheader, contentHtml }) => {
     const safeSubject = escapeHtml(subject || "DevSync");
     const safePreheader = escapeHtml(preheader || subject || "");
 
-    // Table-based layout for broad email client support.
     return `
 <!doctype html>
 <html lang="en">

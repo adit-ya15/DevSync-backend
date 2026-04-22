@@ -204,7 +204,6 @@ exports.getMyVideos = async (req, res, next) => {
             .sort({ createdAt: -1 })
             .lean();
 
-        // Check if liked
         const videoIds = videos.map(v => v._id);
         const userLikes = await Like.find({
             userId: userId,
@@ -238,10 +237,10 @@ exports.getLikedVideos = async (req, res, next) => {
 
         const likedVideos = userLikes
             .map(like => like.videoId)
-            .filter(video => video != null) // in case video was deleted
+            .filter(video => video != null)
             .map(video => ({
                 ...video,
-                isLiked: true // since these are liked videos
+                isLiked: true
             }));
 
         res.json(likedVideos);

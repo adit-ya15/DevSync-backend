@@ -1,14 +1,11 @@
 const express = require("express");
-const { userAuth } = require("../middlewares/auth"); // Assuming this exists
+const { userAuth } = require("../middlewares/auth");
 const Activity = require("../models/activity");
 const UserBadge = require("../models/userBadge");
 const { trackUserActivity } = require("../services/gamificationService");
 
 const gamificationRouter = express.Router();
 
-/**
- * Route to manually hit and log user activity (e.g. from frontend once a day or on login/event)
- */
 gamificationRouter.post("/activity", userAuth, async (req, res) => {
     try {
         const streak = await trackUserActivity(req.user._id);
@@ -18,9 +15,6 @@ gamificationRouter.post("/activity", userAuth, async (req, res) => {
     }
 });
 
-/**
- * Route to get 365 day activity matrix for the contribution graph
- */
 gamificationRouter.get("/activity", userAuth, async (req, res) => {
     try {
         const pastYear = new Date();
@@ -31,10 +25,8 @@ gamificationRouter.get("/activity", userAuth, async (req, res) => {
             date: { $gte: pastYear }
         }).sort({ date: 1 });
 
-        // Retrieve streak stats from user
         const { currentStreak, longestStreak } = req.user;
 
-        // Retrieve badges
         const badges = await UserBadge.find({ userId: req.user._id });
 
         res.json({
